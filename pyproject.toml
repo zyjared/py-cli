@@ -1,0 +1,32 @@
+[build-system]
+requires = [ "poetry-core",]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "zyjared-cli"
+version = "0.1.14"
+description = "zyjared's cli tool"
+authors = [ "zyjared <zyjared@outlook.com>",]
+readme = "README.md"
+license = "MIT"
+
+[tool.poetry.urls]
+homepage = "https://github.com/zyjared/zyjared-cli"
+repository = "https://github.com/zyjared/zyjared-cli"
+documentation = "https://github.com/zyjared/zyjared-cli#readme"
+
+[tool.poetry.scripts]
+zycli = "zyjared_cli.main:app"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+toml = "^0.10.2"
+zyjared-color = "^0.5.4"
+pyperclip = "^1.9.0"
+
+[tool.poetry.dependencies.typer]
+extras = [ "all",]
+version = "^0.12.3"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.3.2"
