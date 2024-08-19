@@ -4,8 +4,11 @@ import os
 import fnmatch
 from .app import app
 from ..helpers.log import log_run
-from ..helpers.config import prefer_specified_config
+from ..helpers.config import resolve_config
+from zyjared_color import bright_black
 import shutil
+
+gray = bright_black
 
 __all__ = [
     'clean'
@@ -45,8 +48,9 @@ def _fpattern(pattern: str):
 
 def _match(filename: str, patterns: list[str]):
     """
-    判断文件名是否在给定的 patterns 中,
-    filemame 和 pattern 应已被 _fpath 和 _fpattern 处理
+    判断文件名是否和 patterns 中的规则匹配。
+
+    filemame 和 patterns 应已被 _fpath 和 _fpattern 处理。
     """
     for pattern in patterns:
         if fnmatch.fnmatch(filename, pattern):
@@ -67,7 +71,7 @@ def _sep_patterns(patterns: list[str]):
 
 def _clean0(filename: str, exclude: list[str]):
     """
-    给定排除列表的 pattern, 如果文件名不在排除列表中, 则删除文件
+    删除匹配 exclude 中的规则的文件
     """
     if not _match(_fpath(filename), exclude):
         if os.path.isfile(filename):
@@ -85,6 +89,9 @@ def _clean0(filename: str, exclude: list[str]):
 
 
 def _clean1(filename: str, include: list[str], exclude: list[str] = [], removed: list[str] = []):
+    """
+    删除匹配 include 中的规则但不匹配 exclude 中的规则的文件
+    """
     _filename = _fpath(filename)
     if _match(_filename, include) and not _match(_filename, exclude):
         if os.path.isfile(filename):
@@ -101,7 +108,7 @@ def _clean1(filename: str, include: list[str], exclude: list[str] = [], removed:
                     _rmdir(filename)
                     removed.append(filename)
             except OSError:
-                removed.append(f'(skipped) {filename}')
+                removed.append(f'{gray('<已忽略>')} {filename}')
 
     if os.path.isdir(filename):
         for child in os.listdir(filename):
@@ -112,16 +119,16 @@ def _clean1(filename: str, include: list[str], exclude: list[str] = [], removed:
 
 def _clean(dirpath: str = None, patterns: list[str] = None):
     if not dirpath:
-        return {'error': 'No directory specified.'}
+        return {'错误': '未指定目录。'}
 
     if not os.path.exists(dirpath):
-        return {'error': f'Directory {dirpath} does not exist.'}
+        return {'错误': f'目录 {dirpath} 不存在。'}
     if not patterns:
-        return {'error': 'No patterns specified.'}
+        return {'错误': '未指定清理规则。'}
     include, exclude = _sep_patterns(patterns)
     return {
-        'dirpath': dirpath,
-        'removed': _clean1(dirpath, include, exclude)
+        '目录': dirpath,
+        '清理': _clean1(dirpath, include, exclude)
     }
 
 
@@ -131,7 +138,7 @@ def clean(
         str,
         typer.Argument(
             show_default=False,
-            help="Specify the directory to clean up.",
+            help="需要清理的目录。",
         )
     ] = None,
     pattern: Annotated[
@@ -140,16 +147,17 @@ def clean(
             '-p',
             '--pattern',
             show_default=False,
-            help="Specify the pattern to clean up.",
+            help="清理规则，支持通配符。",
         )
     ] = None,
 ):
     """
-    Clean up files in a directory with specified pattern.
+    根据清理规则清理目录下的文件
     """
 
-    config = prefer_specified_config(
+    config = resolve_config(
         cliname='clean',
+        default_priority=True,
         dirpath=dirpath,
         pattern=pattern
     )

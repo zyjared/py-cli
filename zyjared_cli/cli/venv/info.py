@@ -3,14 +3,14 @@ from ._app import app, DATA_FILE
 
 def _info():
     return {
-        "file": DATA_FILE
+        "数据文件": DATA_FILE
     }
 
 
 @app.command()
 def info():
     """
-    Show some information.
+    显示一些信息
     """
     log_run(
         _info,

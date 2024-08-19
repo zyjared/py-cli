@@ -13,8 +13,9 @@ CONFIG_PATH = Path.cwd() / 'zycli.toml'
 
 def get_config(config_path=CONFIG_PATH, *, cliname: str = None, group: str = None, ensure_exists: bool = False) -> None | dict:
     """
-    获取指定路径的配置, 如果文件不存在则返回 `None`,否则返回 `dict`。
-    可以进一步指定 `cli` 项。
+    获取指定路径的配置, 如果文件不存在则返回 `None`。
+        - 如果 `ensure_exists` 为 `True`，则会创建文件，并返回空字典。
+        - 可以进一步指定 `group` 和 `cliname` 项作为获取的键
     """
     if not config_path.exists():
         if ensure_exists:
@@ -48,21 +49,21 @@ def save_config(config_path=CONFIG_PATH, *, config: dict):
     return config_path.write_text(toml.dumps(config))
 
 
-def resolve_config(cliname: str = None, *, group: str = None, config_path=CONFIG_PATH, **kwargs):
+def resolve_config(cliname: str = None, *, config_path=CONFIG_PATH, group: str = None, default_priority=True,  **kwargs):
     """
-    获取指定路径配置的 `cli` 项, 可传入默认值 `**kwargs`。
+    获取指定路径配置的 `cliname` 项, 结果会合并 `**kwargs`。
+
+    参数 `default_priority`:
+      - 为 `True` 时，会优先使用非 `None` 的 `**kwargs` 值
+      - 为 `False` 时，会优先使用非 `None` 的 `config` 值
     """
     config = get_config(config_path, cliname=cliname, group=group) or {}
-    return {**kwargs, **config}
 
+    if not kwargs:
+        pass
+    elif default_priority:
+        config = {**config, **{k: v for k, v in kwargs.items() if v is not None}}
+    else:
+        config = {**kwargs, **{k: v for k, v in config.items() if v is not None}}
 
-def prefer_specified_config(cliname: str = None, *, group: str = None, config_path=CONFIG_PATH, **kwargs):
-    """
-    获取指定路径配置的 `cli` 项, 优先使用 `**kwargs` 为真的值。
-    """
-    config = resolve_config(
-        cliname=cliname, config_path=config_path, group=group)
-    for k, v in kwargs.items():
-        if v is not None and k in config:
-            config[k] = v
     return config

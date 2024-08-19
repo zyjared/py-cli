@@ -10,7 +10,7 @@ import shutil
 def _remove(alias: str):
     venvs = get_data('ls')
     if venvs is None:
-        return {"error": "No venvs found."}
+        return {"error": "虚拟环境的数据不存在。"}
 
     _venvs = []
     _removed = None
@@ -38,12 +38,12 @@ def remove(
     alias: Annotated[
         str,
         typer.Argument(
-            help="Specify the venv alias.",
+            help="虚拟环境的别名。",
         )
     ]
 ):
     """
-    Remove a venv.
+    删除虚拟环境
     """
     log_run(
         lambda: _remove(alias),

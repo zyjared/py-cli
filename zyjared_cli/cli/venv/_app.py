@@ -18,7 +18,9 @@ _DATA_KEY = Literal['ls']
 @app.callback()
 def callback():
     """
-    Manage env.
+    管理虚拟环境
+
+    如果不是通过 add 创建的虚拟环境，不会出现在 `ls` 命令中, 可以通过 `add --skip` 来添加。
     """
 
 
@@ -45,7 +47,7 @@ def save_data(key: _DATA_KEY, *, data: Any):
     return save_config(DATA_FILE, config=config)
 
 
-def is_env_dir(path: str|Path):
+def is_env_dir(path: str | Path):
     if isinstance(path, str):
         path = Path(path)
     return (path / 'Scripts' / 'activate').exists()

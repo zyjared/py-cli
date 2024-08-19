@@ -72,7 +72,7 @@ def measure_time(
 
 def _log_list(ls: list, preblank: int = 2, prefix=PREDOT):
     if len(ls) == 0:
-        sys.stdout.write(f'{SEP}{color("Empty List").yellow()}')
+        sys.stdout.write(f'{SEP}{color("空列表").yellow()}')
     for item in ls:
         sys.stdout.write(f'\n{prefix:>{preblank}}{item}')
 
@@ -136,11 +136,12 @@ def log_run(func, *, precision=2, cliname="tool", result_alias="Result", show_ti
         status = 'success'
         if not res['sucess']:
             status = 'fail'
-        elif (isinstance(res['result'], dict) and 'error' in res['result']):
+        elif isinstance(res['result'], dict) and ('error' in res['result'] or '错误' in res['result']):
             status = 'fail'
-            v = res['result']["error"]
-            del res['result']["error"]
-            res['result'][f'{red("ERROR")}'] = v
+            err_key = '错误' if '错误' in res['result'] else 'error'
+            v = res['result'][err_key]
+            del res['result'][err_key]
+            res['result'][f'{red(err_key)}'] = v
         log_title(cliname, tip=status)
 
     _time = 'Time'

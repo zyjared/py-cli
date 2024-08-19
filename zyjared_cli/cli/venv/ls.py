@@ -22,7 +22,7 @@ def _ls():
 @app.command()
 def ls():
     """
-    List all venvs.
+    显示所有数据中的虚拟环境
     """
     log_run(
         _ls,

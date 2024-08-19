@@ -14,7 +14,7 @@ app = typer.Typer()
 @app.callback()
 def callback():
     """
-    This command can be used to update the version of `pyproject.toml`.
+    管理版本号
 
     Example:
 
@@ -33,7 +33,7 @@ def callback():
 @app.command()
 def show():
     """
-    Show the version of `pyproject.toml`.
+    显示当前版项目的版本号, 即文件 `pyproject.toml` 中的 `version` 字段。
     """
     log_run(
         lambda: version(return_str=True),
@@ -49,7 +49,7 @@ def _mode_wrapper(mode: str):
             typer.Option(
             '-d',
             '--down',
-            help=f"Downgrade the version in {red(mode)} mode.",)
+            help=f"版本号根据 {red(mode)} 进行降级",)
         ] = False
     ):
         log_run(
@@ -69,7 +69,7 @@ def _pre_wrapper(mode: str):
             typer.Option(
             '-d',
             '--down',
-            help=f"Downgrade the version in {red(mode)} mode.",)
+            help=f"版本号根据 {red(mode)} 进行降级",)
         ] = False
     ):
         log_run(

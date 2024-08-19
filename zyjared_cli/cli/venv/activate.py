@@ -28,7 +28,7 @@ def _activate(alias: str):
     """
     envs = get_data('ls')
     if envs is None:
-        return {"error": "No venvs found."}
+        return {"error": f"虚拟环境的数据不存在。"}
 
     target = None
     for v in envs:
@@ -37,9 +37,9 @@ def _activate(alias: str):
             break
 
     if target is None:
-        return {"error": f"{bold(alias)} not found."}
+        return {"error": f"名为 {bold(alias)} 的虚拟环境不存在。"}
     elif not is_env_dir(target['path']):
-        return {"warning": f"{bold(alias)} is not a venv."}
+        return {"warning": f"{bold(target['path']).red()} 不是一个有效的虚拟环境路径。"}
 
     trigger = _trigger(target['path'])
 
@@ -47,7 +47,7 @@ def _activate(alias: str):
         "alias": target['alias'],
         "path": target['path'],
         "activate": f'{trigger}',
-        "status": f'{bold('Copied!').green()}'
+        "status": f'{bold('已复制!').green()}'
     }
 
 
@@ -56,12 +56,12 @@ def activate(
     alias: Annotated[
         str,
         typer.Argument(
-            help="Specify the venv alias.",
+            help="虚拟环境的别名。",
         )
     ]
 ):
     """
-    Activate a env.
+    获得指定的虚拟环境的 activate 命令，命令将会被复制到剪贴板
     """
     log_run(
         lambda: _activate(alias),
@@ -75,12 +75,12 @@ def run(
     alias: Annotated[
         str,
         typer.Argument(
-            help="Specify the venv alias.",
+            help="虚拟环境的别名。",
         )
     ]
 ):
     """
-    An alias for activate.
+    `activate` 的别名
     """
     log_run(
         lambda: _activate(alias),

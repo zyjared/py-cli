@@ -148,19 +148,19 @@ def _config(cliname: str | None, *, group: str = None):
         if group in c:
             return _formate_config(c[group], group=group)
         else:
-            return {'error': red(f"Config [group: {group}] is not found.")}
+            return {'错误': red(f"配置项[{group}]不存在。")}
 
     elif group:
         if group in c and cliname in c[group]:
             return c[group][cliname]
         else:
-            return {'error': red(f"Config[{group}.{cliname}] is not found.")}
+            return {'错误': red(f"配置项[{group}.{cliname}]不存在。")}
 
     else:
         if cliname in c:
             return c[cliname]
         else:
-            return {'error': red(f"Config[{cliname}] is not found.")}
+            return {'错误': red(f"配置项[{cliname}]不存在。")}
 
 
 def _init(cliname: str | None, *, group: str = None):
@@ -177,15 +177,15 @@ def _init(cliname: str | None, *, group: str = None):
                 if _c:
                     c[group] = _c
                 else:
-                    return {'error': red(f"Config[group: {group}] is ignored.")}
+                    return {'错误': red(f"配置项[{group}]不存在。")}
                 break
     elif group:
-        if group not in c and cliname in c[group]:
-            return {'error': red(f"Config[{group}.{cliname}] already exists.")}
+        if group in c and cliname in c[group]:
+            return {'错误': red(f"配置项[{group}.{cliname}]已存在。")}
 
         _dic = get_command_config(cliname, group=group)
         if _dic is None:
-            return {'error': f'Config[{group}.{cliname}] is ignored.'}
+            return {'错误': f'未找到配置项[{group}.{cliname}]。'}
 
         if group in c:
             c[group][cliname] = _dic
@@ -194,11 +194,11 @@ def _init(cliname: str | None, *, group: str = None):
 
     elif cliname:
         if cliname in c:
-            return {'error': red(f"Config[{cliname}] already exists.")}
+            return {'错误': red(f"配置项[{cliname}]已存在。")}
 
         _dic = get_command_config(cliname)
         if _dic is None:
-            return {'error': f'Config[{cliname}] is ignored.'}
+            return {'错误': f'未找到配置项[{cliname}]。'}
 
         c[cliname] = _dic
     else:
@@ -226,7 +226,7 @@ def config(
         str,
         typer.Argument(
             show_default=False,
-            help="Show config of specified cli.",
+            help="命令名，不指定则为所有配置项。",
         ),
     ] = None,
     init: Annotated[
@@ -235,12 +235,12 @@ def config(
             '-i',
             '--init',
             show_default=False,
-            help="Initialize config file.",
+            help="初始化配置文件。如果已存在配置项，则会跳过。",
         ),
     ] = False,
 ):
     """
-    Show config of specified cli. And it can also be used to initialize config file.
+    获取配置项，或初始化配置文件
 
     Example:
 
@@ -257,7 +257,7 @@ def config(
         log_run(
             lambda: _init(cli, group=group),
             cliname='config',
-            result_alias='Init' +
+            result_alias='配置' +
                 (_fcliname(f'{cli}', group=group, color=False)
                  if cli is not None else '')
         )
@@ -265,6 +265,6 @@ def config(
         log_run(
             lambda: _config(cli, group=group),
             cliname='config',
-            result_alias='Config' if cli is None else _fcliname(
+            result_alias='配置' if cli is None else _fcliname(
                 cli, group=group, color=False),
         )

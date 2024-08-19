@@ -7,7 +7,7 @@ from pathlib import Path
 def _clean():
     venvs = get_data('ls')
     if venvs is None:
-        return {"error": "No venvs found."}
+        return {"error": "虚拟环境的数据不存在。"}
 
     removed = []
     dirs_exits = []
@@ -26,7 +26,7 @@ def _clean():
 @app.command()
 def clean():
     """
-    Clean up venvs that don't have activate script.
+    遍历虚拟环境目录，清理数据中无效的虚拟环境
     """
     log_run(
         lambda: _clean(),

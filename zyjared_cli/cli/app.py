@@ -21,13 +21,13 @@ def version_callback(value: bool):
 def main(
     version: bool = typer.Option(
         None,
-        "--version",
         "-v",
-        help="Show the version number and exit.",
+        "--version",
+        help="显示版本号",
         callback=version_callback,
         is_eager=True,
     )
 ):
     """
-    zyjared's tool.
+    zyjared 自用的命令行工具
     """

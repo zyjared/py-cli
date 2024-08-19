@@ -5,19 +5,24 @@ from zyjared_color import bold
 from typing import Annotated
 from pathlib import Path
 import typer
+import os
 
 
 def _create_env(dir: str, *, env_dir: str = ENV_DIR) -> Path:
     dir = Path(dir).absolute()
-    if is_env_dir(dir / env_dir):
-        raise FileExistsError(f"{env_dir} already exists.")
+    _env = dir / env_dir
+    if os.path.exists(str(dir)):
+        if is_env_dir(_env):
+            raise FileExistsError(f"{_env} 已经存在，并且是一个虚拟环境目录。")
+        raise FileExistsError(f"{dir} 已经存在。")
     else:
         command(
             f'cd {dir} && python -m venv {env_dir}',
             silent=False,
             observe=False
         )
-        return  dir / env_dir
+        return _env
+
 
 def _add(alias: str, path: str, *, skip_venv: bool = False, env_dir: str = ENV_DIR):
     envs = get_data('ls')
@@ -25,11 +30,11 @@ def _add(alias: str, path: str, *, skip_venv: bool = False, env_dir: str = ENV_D
         envs = []
 
     if any(v['alias'] == alias for v in envs):
-        return {"error": f"{bold(alias)} already exists."}
+        return {"error": f"{bold(alias)} 已经存在。"}
 
     if skip_venv:
         if not is_env_dir(path):
-            return {"error": f"{bold(path)} is not a valid venv path."}
+            return {"error": f"{bold(path).red()} 不是一个有效的虚拟环境路径。"}
         _venv_path = Path(path)
     else:
         _venv_path = _create_env(path, env_dir=env_dir)
@@ -51,13 +56,13 @@ def add(
     alias: Annotated[
         str,
         typer.Argument(
-            help="Specify the venv alias.",
+            help="虚拟环境的别名。",
         )
     ],
     path: Annotated[
         str,
         typer.Argument(
-            help="Specify the venv path.",
+            help="在该路径下创建虚拟环境。",
         )
     ],
     skip_venv: Annotated[
@@ -65,19 +70,19 @@ def add(
         typer.Option(
             "--skip",
             show_default=False,
-            help="Skip creating venv.",
+            help="不创建虚拟环境，仅将别名和路径写入配置。",
         )
     ] = False,
     env_dir: Annotated[
         str,
         typer.Option(
             '--dir',
-            help="Specify the venv directory name.",
+            help="虚拟环境目录名。",
         )
     ] = ENV_DIR
 ):
     """
-    Add a venv.
+    添加一个虚拟环境
     """
     log_title(cliname="venv add", tip="执行中...\n")
     log_run(

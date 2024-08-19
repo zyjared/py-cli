@@ -108,7 +108,7 @@ def push(
             "-m",
             "--message",
             show_default=False,
-            help="Specify the commit message.",
+            help="commit message.",
         ),
     ] = None,
     amend: Annotated[
@@ -116,7 +116,7 @@ def push(
         typer.Option(
             "--amend",
             show_default=False,
-            help="Amend the commit.",
+            help="修改上一个提交。",
         )
     ] = False,
     tag: Annotated[
@@ -124,7 +124,7 @@ def push(
         typer.Option(
             "--tag",
             show_default=False,
-            help="Push the latest tag.",
+            help="推送最新标签。",
         )
     ] = None,
     retag: Annotated[
@@ -132,7 +132,7 @@ def push(
         typer.Option(
             "--retag",
             show_default=False,
-            help="Retag the latest tag.",
+            help="重新推送最新标签。",
         )
     ] = False,
     silent: Annotated[
@@ -140,7 +140,7 @@ def push(
         typer.Option(
             "--silent",
             show_default=False,
-            help="Show the command.",
+            help="静默模式, 不输出任何信息。",
         )
     ] = False,
     observe: Annotated[
@@ -148,12 +148,41 @@ def push(
         typer.Option(
             "--observe",
             show_default=False,
-            help="Observe the command. Only used in debug mode.",
+            help="观察模式, 不执行命令, 但是会输出信息。",
         )
     ] = False,
 ):
     """
-    Push to the repo.
+    推送最新代码到远程仓库
+
+    ---
+
+    # main 分支
+
+        $ git add .
+
+        $ git commit -m "message" [--amend]
+
+        $ git push origin main [--force]
+
+    ---
+
+    # tag [mode]
+
+        $ zycli version [mode] # 代码版本
+
+    # retag
+
+        $ git tag -d v0.0.0
+
+        $ git push origin -d v0.0.0
+
+    ---
+
+        $ git tag v0.0.0
+
+        $ git push origin v0.0.0
+
     """
     log_title(cliname='push')
     try:
