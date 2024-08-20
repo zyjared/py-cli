@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "zyjared-cli"
-version = "0.1.14"
+version = "0.1.15"
 description = "zyjared's cli tool"
 authors = [ "zyjared <zyjared@outlook.com>",]
 readme = "README.md"
