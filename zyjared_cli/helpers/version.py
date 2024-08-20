@@ -31,9 +31,12 @@ PRE_MODE = ['alpha', 'beta', 'rc', 'dev']
 MODE = ['major', 'minor', 'patch']
 
 
-def _read(p=PYPROJECT_PATH):
+def _read(p=PYPROJECT_PATH, *, exception=True):
     if not p.exists():
-        raise FileNotFoundError(f'Can not find {p}.')
+        if exception:
+            raise FileNotFoundError(f'Can not find {p}.')
+        else:
+            return {}
     return toml.loads(p.read_text())
 
 
@@ -88,16 +91,21 @@ def _down(v: str | list, index: _INDEX):
     return _update_version(v, index=index, down=True)
 
 
-def version(*, return_str: bool = False, config: dict = None):
-    config = _read() if config is None else config
+def version(*, return_str: bool = False, config: dict = None, exception=True):
+    """
+    获取版本号
+    """
+    config = _read(exception=False) if config is None else config
     try:
         v: str = config['tool']['poetry']['version']
         if return_str:
             return v
         return load_version(v)
     except KeyError:
-        raise ValueError(
-            'Can not find version in pyproject.toml. [tool.poetry.version]')
+        if exception:
+            raise ValueError('未找到版本号。[tool.poetry.version]')
+        else:
+            return None
 
 
 def save_version(v: str | list, *, config: dict = None, path=PYPROJECT_PATH):

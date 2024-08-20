@@ -54,11 +54,15 @@ def _system(silent=False, observe=False, *args):
     return list(args)
 
 
-def _push(message: str = None, *, amend=False, tag: _V = None, retag=False, silent=False, observe=False):
+def _push(message: str = None, *, branch='main', skipbranch=False, amend=False, tag: _V = None, retag=False, silent=False, observe=False):
     result = {}
 
-    v = version(return_str=True)
+    v = version(return_str=True, exception=False)
 
+    if (tag or retag) and not v:
+        return {"error": "未找到版本号。[tool.poetry.version]"}
+
+    # 重置 tag
     if retag:
         _system(
             silent,
@@ -67,6 +71,7 @@ def _push(message: str = None, *, amend=False, tag: _V = None, retag=False, sile
             f'git push origin -d v{v}',
         )
 
+    # 版本控制
     if tag:
         up = handle_version(mode=tag.value, down=False, save=(not observe))
         v = dump_version(up['now'])
@@ -79,14 +84,17 @@ def _push(message: str = None, *, amend=False, tag: _V = None, retag=False, sile
                     dump_version(up['old'])} -> {dump_version(up['now'])}',
             )
 
-    _system(
-        silent,
-        observe,
-        'git add .',
-        f'git commit{"" if not amend else " --amend"} -m "{message}"',
-        f'git push origin main{"" if not amend else " --force"}',
-    )
+    # add 和 commit
+    _system(silent, observe,
+            'git add .',
+            f'git commit{"" if not amend else " --amend"} -m "{message}"')
 
+    # branch
+    if not skipbranch:
+        _system(silent, observe,
+                f'git push origin {branch}{"" if not amend else " --force"}')
+
+    # tag
     if tag or retag:
         _system(
             silent,
@@ -111,6 +119,21 @@ def push(
             help="commit message.",
         ),
     ] = None,
+    branch: Annotated[
+        str,
+        typer.Option(
+            "--branch",
+            help="推送的分支名。",
+        ),
+    ] = "main",
+    skipbranch: Annotated[
+        bool,
+        typer.Option(
+            "--skip",
+            show_default=False,
+            help="跳过推送分支。",
+        )
+    ] = False,
     amend: Annotated[
         bool,
         typer.Option(
@@ -163,7 +186,7 @@ def push(
 
         $ git commit -m "message" [--amend]
 
-        $ git push origin main [--force]
+        $ git push origin [branch] [--force]
 
     ---
 
@@ -186,7 +209,7 @@ def push(
     """
     log_title(cliname='push')
     try:
-        result = _push(message, amend=amend, tag=tag,
+        result = _push(message, branch=branch, skipbranch=skipbranch, amend=amend, tag=tag,
                        retag=retag, silent=silent, observe=observe)
         status = bold('SUCCESS').green()
     except Exception as e:
