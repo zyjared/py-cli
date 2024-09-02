@@ -14,6 +14,10 @@ __all__ = [
     'clean'
 ]
 
+DEFAULT_IGNORE = [
+    ''
+]
+
 
 def _rmdir(path: str):
     shutil.rmtree(path)
@@ -93,7 +97,10 @@ def _clean1(filename: str, include: list[str], exclude: list[str] = [], removed:
     删除匹配 include 中的规则但不匹配 exclude 中的规则的文件
     """
     _filename = _fpath(filename)
-    if _match(_filename, include) and not _match(_filename, exclude):
+    if _match(_filename, exclude):
+        return removed
+
+    if _match(_filename, include):
         if os.path.isfile(filename):
             os.remove(filename)
             removed.append(filename)
@@ -109,8 +116,7 @@ def _clean1(filename: str, include: list[str], exclude: list[str] = [], removed:
                     removed.append(filename)
             except OSError:
                 removed.append(f'{gray('<已忽略>')} {filename}')
-
-    if os.path.isdir(filename):
+    elif os.path.isdir(filename):
         for child in os.listdir(filename):
             _clean1(os.path.join(filename, child), include, exclude, removed)
 
@@ -137,7 +143,6 @@ def clean(
     dirpath: Annotated[
         str,
         typer.Argument(
-            show_default=False,
             help="需要清理的目录。",
         )
     ] = None,
@@ -146,7 +151,6 @@ def clean(
         typer.Option(
             '-p',
             '--pattern',
-            show_default=False,
             help="清理规则，支持通配符。",
         )
     ] = None,
@@ -161,6 +165,8 @@ def clean(
         dirpath=dirpath,
         pattern=pattern
     )
+
+    print(config)
 
     log_run(
         lambda: _clean(

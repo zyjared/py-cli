@@ -1,49 +1,12 @@
 from typing import Literal
-from zyjared_color import Color, color, cyan, red, green, bold
+from zyjared_color import Color, color, red, green, bold, zprint
+from ..utils.time_unit import endow_time_unit
 import time
-import sys
 
 __all__ = [
     'log',
     'log_run'
 ]
-
-UNITS = ['s', 'ms', 'us', 'ns']
-PREDOT = Color(' · ').bold().cyan()
-SEP = '  '
-
-_COLORS = [
-    'cyan',
-    'blue',
-    'magenta',
-]
-_COLOR_LEN = len(_COLORS)
-
-
-def _color(text, i):
-    return getattr(color(text), _COLORS[i % _COLOR_LEN])()
-
-
-def _endow_unit(t: int, init_unit: Literal['s', 'ms', 'us', 'ns'] = 's', *, precision=2):
-    i = UNITS.index(init_unit)
-
-    for j in range(i, len(UNITS)):
-        if t >= 1:
-            break
-        else:
-            t = t * (1000 ** j)
-            i = j
-
-    if t > 1:
-        msg = f'{round(t, precision)} {cyan(UNITS[i])}'
-    else:
-        msg = f'{'<1'} {cyan(UNITS[i])}'
-
-    return {
-        "time": t,
-        "unit": UNITS[i],
-        "msg": msg
-    }
 
 
 def measure_time(
@@ -61,43 +24,14 @@ def measure_time(
 
     end = time.time()
 
-    endowed = _endow_unit(end - start, precision=precision)
+    endowed = endow_time_unit(end - start, precision=precision)
 
     return {
         "sucess": sucess,
-        "time": endowed['msg'],
+        "time": endowed,
         "result": result,
     }
 
-
-def _log_list(ls: list, preblank: int = 2, prefix=PREDOT):
-    if len(ls) == 0:
-        sys.stdout.write(f'{SEP}{color("空列表").yellow()}')
-    for item in ls:
-        sys.stdout.write(f'\n{prefix:>{preblank}}{item}')
-
-    sys.stdout.flush()
-
-
-def _log_dict(d: dict, preblank: int = 2, prefix=PREDOT, _cn=0):
-    if len(d) == 0:
-        return
-
-    length = max([len(k) for k in d.keys()])
-    for k, v in d.items():
-        key = k if '\033[' in k else _color(k, _cn)
-        sys.stdout.write(f'{" " * preblank}{key:<{length}}')
-        if isinstance(v, list):
-            _log_list(v, preblank + 4, prefix)
-        elif isinstance(v, dict):
-            sys.stdout.write('\n')
-            _log_dict(v, preblank + 2, prefix, _cn + 1)
-        elif isinstance(v, str) and not v:
-            sys.stdout.write(f'{SEP}{v!r}\n')
-        else:
-            sys.stdout.write(f'{SEP}{v}\n')
-
-    sys.stdout.flush()
 
 
 def log_title(cliname: str = "tool", tip: Literal['success', 'fail', 'warning'] | str = ''):
@@ -119,14 +53,7 @@ def log_title(cliname: str = "tool", tip: Literal['success', 'fail', 'warning'] 
 def log(
     content: str | list | dict | Color,
 ):
-    if isinstance(content, list):
-        _log_list(content, preblank=4, prefix=PREDOT)
-    elif isinstance(content, dict):
-        _log_dict(content, preblank=2, prefix=PREDOT)
-    else:
-        sys.stdout.write(f'{content}')
-        sys.stdout.flush()
-
+    zprint(content, blank=2)
 
 def log_run(func, *, precision=2, cliname="tool", result_alias="Result", show_title=True):
     res = measure_time(func, precision)
@@ -154,7 +81,7 @@ def log_run(func, *, precision=2, cliname="tool", result_alias="Result", show_ti
         _time = red(_time).red()
         _result = red(_result).red()
 
-    log({
+    zprint({
         f'{_time}': res['time'],
         f'{_result}': res['result'],
     })
