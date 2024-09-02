@@ -11,7 +11,7 @@ import os
 def _create_env(dir: str, *, env_dir: str = ENV_DIR) -> Path:
     dir = Path(dir).absolute()
     _env = dir / env_dir
-    if os.path.exists(str(dir)):
+    if os.path.exists(str(_env)):
         if is_env_dir(_env):
             raise FileExistsError(f"{_env} 已经存在，并且是一个虚拟环境目录。")
         raise FileExistsError(f"{dir} 已经存在。")
@@ -86,7 +86,7 @@ def add(
     """
     log_title(cliname="venv add", tip="执行中...\n")
     log_run(
-        lambda: _add(path=path, alias=alias,
+        lambda: _add(alias=alias, path=path,
                      skip_venv=skip_venv, env_dir=env_dir),
         cliname="env",
         result_alias="Added",

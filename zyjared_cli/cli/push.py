@@ -115,10 +115,9 @@ def push(
         typer.Option(
             "-m",
             "--message",
-            show_default=False,
-            help="commit message.",
+            help="提交信息。",
         ),
-    ] = None,
+    ] = "auto push",
     branch: Annotated[
         str,
         typer.Option(
@@ -130,7 +129,6 @@ def push(
         bool,
         typer.Option(
             "--skip",
-            show_default=False,
             help="跳过推送分支。",
         )
     ] = False,
@@ -138,7 +136,6 @@ def push(
         bool,
         typer.Option(
             "--amend",
-            show_default=False,
             help="修改上一个提交。",
         )
     ] = False,
@@ -146,7 +143,6 @@ def push(
         _V,
         typer.Option(
             "--tag",
-            show_default=False,
             help="推送最新标签。",
         )
     ] = None,
@@ -154,7 +150,6 @@ def push(
         bool,
         typer.Option(
             "--retag",
-            show_default=False,
             help="重新推送最新标签。",
         )
     ] = False,
@@ -162,7 +157,6 @@ def push(
         bool,
         typer.Option(
             "--silent",
-            show_default=False,
             help="静默模式, 不输出任何信息。",
         )
     ] = False,
@@ -170,7 +164,6 @@ def push(
         bool,
         typer.Option(
             "--observe",
-            show_default=False,
             help="观察模式, 不执行命令, 但是会输出信息。",
         )
     ] = False,
